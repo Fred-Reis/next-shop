@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
 import Stripe from "stripe";
+import axios from "axios";
 
 import { stripe } from "../../lib/stripe";
 
@@ -17,25 +18,39 @@ interface ProductProps {
     imageUrl: string;
     price: string;
     description: string;
+    defaultPriceId: string;
   };
 }
 
 export default function Product({ product }: ProductProps) {
-  const { id, imageUrl, name, price, description } = product;
+  async function handleBuyProduct() {
+    console.log(product.defaultPriceId);
+    try {
+      const response = await axios.post("http://localhost:3000/api/checkout", {
+        priceId: product.defaultPriceId,
+      });
+
+      const { checkoutUrl } = response.data;
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      alert("Something went wrong!");
+    }
+  }
 
   return (
     <ProductContainer>
       <ImageContainer>
-        <Image src={imageUrl} width={530} height={480} alt="" />
+        <Image src={product.imageUrl} width={530} height={480} alt="" />
       </ImageContainer>
 
       <ProductDetails>
-        <h1>{name}</h1>
-        <span>{price}</span>
+        <h1>{product.name}</h1>
+        <span>{product.price}</span>
 
-        <p>{description}</p>
+        <p>{product.description}</p>
 
-        <button>Buy Now</button>
+        <button onClick={handleBuyProduct}>Buy Now</button>
       </ProductDetails>
     </ProductContainer>
   );
@@ -44,7 +59,7 @@ export default function Product({ product }: ProductProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
   return {
     paths: [{ params: { id: "prod_OozW7d565Siwcw" } }],
-    fallback: false,
+    fallback: "blocking",
   };
 };
 
@@ -70,7 +85,9 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
           currency: "USD",
         }).format(price.unit_amount / 100),
         description: product.description,
+        defaultPriceId: price.id,
       },
     },
+    revalidate: 60 * 60 * 1, // 1hour
   };
 };
