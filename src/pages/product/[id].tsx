@@ -10,6 +10,7 @@ import {
   ProductContainer,
   ProductDetails,
 } from "../../styles/pages/product";
+import { useState } from "react";
 
 interface ProductProps {
   product: {
@@ -23,9 +24,14 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
+    useState(false);
+
   async function handleBuyProduct() {
     console.log(product.defaultPriceId);
     try {
+      setIsCreatingCheckoutSession(true);
+
       const response = await axios.post("http://localhost:3000/api/checkout", {
         priceId: product.defaultPriceId,
       });
@@ -34,6 +40,7 @@ export default function Product({ product }: ProductProps) {
 
       window.location.href = checkoutUrl;
     } catch (error) {
+      setIsCreatingCheckoutSession(false);
       alert("Something went wrong!");
     }
   }
@@ -50,7 +57,9 @@ export default function Product({ product }: ProductProps) {
 
         <p>{product.description}</p>
 
-        <button onClick={handleBuyProduct}>Buy Now</button>
+        <button disabled={isCreatingCheckoutSession} onClick={handleBuyProduct}>
+          Buy Now
+        </button>
       </ProductDetails>
     </ProductContainer>
   );
