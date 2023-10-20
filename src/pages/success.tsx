@@ -1,10 +1,12 @@
-import Link from "next/link";
-import { ImageContainer, SuccessContainer } from "../styles/pages/success";
 import { GetServerSideProps } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import Head from "next/head";
+
 import { stripe } from "../lib/stripe";
 import Stripe from "stripe";
-import Image from "next/image";
 
+import { ImageContainer, SuccessContainer } from "../styles/pages/success";
 interface SuccessProps {
   customerName: string;
   product: {
@@ -15,19 +17,27 @@ interface SuccessProps {
 
 export default function Success({ customerName, product }: SuccessProps) {
   return (
-    <SuccessContainer>
-      <h1>Purchase made successfully!</h1>
-      <ImageContainer>
-        <Image src={product.imageUrl} width={120} height={110} alt="" />
-      </ImageContainer>
+    <>
+      <Head>
+        <title>Purchase done | Next-Shop</title>
 
-      <p>
-        Wow <strong>{customerName}</strong>, your{" "}
-        <strong>{product.name}</strong> is on its way!
-      </p>
+        <meta name="robots" content="noindex" />
+      </Head>
 
-      <Link href="/">Back to home</Link>
-    </SuccessContainer>
+      <SuccessContainer>
+        <h1>Purchase made successfully!</h1>
+        <ImageContainer>
+          <Image src={product.imageUrl} width={120} height={110} alt="" />
+        </ImageContainer>
+
+        <p>
+          Wow <strong>{customerName}</strong>, your{" "}
+          <strong>{product.name}</strong> is on its way!
+        </p>
+
+        <Link href="/">Back to home</Link>
+      </SuccessContainer>
+    </>
   );
 }
 
